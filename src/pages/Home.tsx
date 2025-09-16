@@ -135,7 +135,7 @@ export default function Home() {
                 id="footer"
                 className="py-10 text-center text-gray-500 text-sm bg-gray-900"
             >
-                © 2025 AuS4D — Built with ❤️ in React & Tailwind
+                © 2025 AuS4D — Built by Leran Peng and Runzhi Zhao from UWA
             </footer>
         </main>
     );
