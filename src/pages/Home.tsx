@@ -115,18 +115,6 @@ export default function Home() {
                             </p>
                         </div>
                     </div>
-                    <motion.p {...revealMotionProps} className="mt-6 text-base md:text-lg text-gray-300 print-text-black">
-                        {intl.formatMessage({ id: "home.hero.description" })}
-                    </motion.p>
-                    <div className="no-print mt-6">
-                        <button
-                            type="button"
-                            onClick={() => window.print()}
-                            className="px-4 py-2 rounded-xl bg-emerald-500/90 hover:bg-emerald-500 text-white font-medium shadow"
-                        >
-                            {intl.formatMessage({ id: "home.hero.printCta" })}
-                        </button>
-                    </div>
                 </div>
             </header>
 

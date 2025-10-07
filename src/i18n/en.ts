@@ -6,7 +6,6 @@ const enMessages = {
     "home.nav.contact": "Contact",
     "home.hero.title": "Australian Students for Development",
     "home.hero.subtitle": "A student-led network for international development & humanitarian action",
-    "home.hero.description": "Smooth animations on web, clear structure on PDF — built with React, Tailwind, and Framer Motion.",
     "home.hero.printCta": "Print to PDF",
     "home.about.heading": "About AuS4D",
     "home.about.intro": "We connect students and early-career practitioners across disciplines, universities and pathways to learn, connect and collaborate on just, sustainable development.",
