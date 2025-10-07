@@ -32,7 +32,7 @@ const enMessages = {
     "home.cards.about.bullet.1": "Learn — engage with experts and practitioners to understand current debates and challenges.",
     "home.cards.about.bullet.2": "Connect — build a community committed to justice, equity and sustainability.",
     "home.cards.about.bullet.3": "Collaborate — create opportunities to work together on events, projects and ideas that drive meaningful change.",
-    "home.footer.attribution": "© {year} AuS4D — Built by Leran Peng & Runzhi Zhao (UWA). For print enquiries, contact info@aus4d.org."
+    "home.footer.attribution": "© {year} AuS4D — Built by Leran Peng & Runzhi Zhao (UWA)."
 } as const;
 
 export default enMessages;
