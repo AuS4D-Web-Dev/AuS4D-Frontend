@@ -2,15 +2,19 @@ import type { FC } from "react";
 
 interface FooterProps {
     id?: string;
-    text: string;
 }
 
-const Footer: FC<FooterProps> = ({ id = "footer", text }) => (
-    <footer id={id} className="px-6 py-12">
-        <div className="max-w-5xl mx-auto text-center text-gray-400 print-text-black">
-            <hr className="border-gray-700 print-border mb-6" />
-            <p className="text-sm print-text-black">{text}</p>
-        </div>
+const Footer: FC<FooterProps> = ({ id = "footer" }) => (
+    <footer
+        id={id}
+        className="bg-green-800 text-white py-10 text-center mt-auto font-poppins"
+    >
+        <p className="text-lg font-medium">
+            © {new Date().getFullYear()} Australian Students for Development Network
+        </p>
+        <p className="text-sm mt-2 text-green-200">
+            Building connections for a more just and sustainable world.
+        </p>
     </footer>
 );
 

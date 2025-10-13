@@ -22,9 +22,10 @@ interface InfoCardProps {
 }
 
 const renderMedia = (media?: MediaProps): ReactNode => {
+    // 和文件一致的灰色占位视觉
     if (!media) {
         return (
-            <div className="flex h-40 w-full items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-sm text-emerald-200/80">
+            <div className="flex aspect-[16/9] w-full items-center justify-center rounded-lg bg-gray-200 text-sm text-gray-500">
                 Media coming soon
             </div>
         );
@@ -32,19 +33,25 @@ const renderMedia = (media?: MediaProps): ReactNode => {
 
     if (media.kind === "video") {
         return (
-            <video
-                src={media.src}
-                aria-label={media.alt}
-                loop
-                muted
-                autoPlay
-                playsInline
-                className="h-full w-full rounded-xl object-cover"
-            />
+            <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-gray-200">
+                <video
+                    src={media.src}
+                    aria-label={media.alt}
+                    loop
+                    muted
+                    autoPlay
+                    playsInline
+                    className="h-full w-full object-cover"
+                />
+            </div>
         );
     }
 
-    return <img src={media.src} alt={media.alt} className="h-full w-full rounded-xl object-cover" />;
+    return (
+        <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-gray-200">
+            <img src={media.src} alt={media.alt} className="h-full w-full object-cover" />
+        </div>
+    );
 };
 
 const InfoCard: FC<InfoCardProps> = ({ title, body, media }) => {
@@ -52,14 +59,13 @@ const InfoCard: FC<InfoCardProps> = ({ title, body, media }) => {
 
     const renderBlocks = () =>
         body.map((block, index) => {
-            const baseClasses = "text-base md:text-lg print-text-black";
             const isLast = index === body.length - 1;
 
             if (block.type === "highlight") {
                 return (
                     <p
-                        key={`highlight-${block.text}`}
-                        className={`${baseClasses} text-emerald-200 font-semibold ${isLast ? "" : "mb-1"}`.trim()}
+                        key={`highlight-${index}`}
+                        className={`text-lg font-semibold text-green-800 ${isLast ? "" : "mb-1"}`.trim()}
                     >
                         {block.text}
                     </p>
@@ -70,10 +76,10 @@ const InfoCard: FC<InfoCardProps> = ({ title, body, media }) => {
                 return (
                     <ul
                         key={`list-${index}`}
-                        className="list-disc pl-5 space-y-2 text-gray-200 text-base md:text-lg print-text-black"
+                        className="list-disc pl-6 space-y-2 text-left text-lg text-gray-700"
                     >
-                        {block.items.map((item) => (
-                            <li key={item} className="text-gray-200 leading-relaxed print-text-black">
+                        {block.items.map((item, i) => (
+                            <li key={`${i}-${item}`} className="leading-relaxed">
                                 {item}
                             </li>
                         ))}
@@ -83,8 +89,8 @@ const InfoCard: FC<InfoCardProps> = ({ title, body, media }) => {
 
             return (
                 <p
-                    key={`paragraph-${block.text}`}
-                    className={`${baseClasses} text-gray-300 leading-relaxed ${isLast ? "" : "mb-3"}`.trim()}
+                    key={`paragraph-${index}`}
+                    className={`text-lg leading-relaxed text-gray-700 ${isLast ? "" : "mb-3"}`.trim()}
                 >
                     {block.text}
                 </p>
@@ -92,47 +98,48 @@ const InfoCard: FC<InfoCardProps> = ({ title, body, media }) => {
         });
 
     const renderBody = () => (
-        <div className="flex flex-col gap-6 md:flex-row">
-            <div className="md:w-2/5 flex items-center justify-center">{renderMedia(media)}</div>
-            <div className="md:w-3/5">
-                <div className="flex flex-col gap-3">{renderBlocks()}</div>
+        <div className="mt-3 w-full rounded-xl bg-gray-50 p-6">
+            <div className="flex w-full items-start gap-8 md:flex-row md:items-start">
+                <div className="w-full md:w-1/3 flex-shrink-0">{renderMedia(media)}</div>
+                <div className="flex-1 text-left">
+                    <div className="flex flex-col gap-3">{renderBlocks()}</div>
+                </div>
             </div>
         </div>
     );
 
     return (
-        <article className="bg-white/5 rounded-2xl p-6 md:p-8 shadow-xl print-bg-white print-text-black avoid-break">
+        <article className="mx-auto max-w-6xl border-b border-gray-200 py-4 font-poppins text-left">
+            {/* 头部按钮与 + / −，样式对齐文件 */}
             <button
                 type="button"
                 onClick={() => setIsOpen((prev) => !prev)}
-                className="flex w-full items-center justify-between text-left print:hidden"
+                className="flex w-full items-center justify-between text-left focus:outline-none"
                 aria-expanded={isOpen}
             >
-                <span className="text-2xl md:text-3xl font-bold text-emerald-300 print-text-black">{title}</span>
-                <span className="text-emerald-200 text-xl md:text-2xl" aria-hidden="true">
-                    {isOpen ? "–" : "+"}
-                </span>
+        <span className="text-xl font-semibold text-green-800 hover:text-green-900 transition-colors md:text-2xl">
+          {title}
+        </span>
+                <span className="text-2xl font-light text-green-800 md:text-3xl" aria-hidden>
+          {isOpen ? "−" : "+"}
+        </span>
             </button>
-            <h2 className="hidden text-2xl md:text-3xl font-bold text-emerald-300 print:block print:text-black">
-                {title}
-            </h2>
 
+            {/* 动画展开区：使用与文件一致的过渡参数 */}
             <AnimatePresence initial={false}>
                 {isOpen && (
                     <motion.div
                         key="infocard-content"
-                        initial={{ height: 0, opacity: 0, scale: 0.98 }}
-                        animate={{ height: "auto", opacity: 1, scale: 1 }}
-                        exit={{ height: 0, opacity: 0, scale: 0.98 }}
-                        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                        className="overflow-hidden print:hidden"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.35, ease: "easeInOut" }}
+                        className="overflow-hidden"
                     >
-                        <div className="mt-6">{renderBody()}</div>
+                        {renderBody()}
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            <div className="hidden mt-6 print:block">{renderBody()}</div>
         </article>
     );
 };
