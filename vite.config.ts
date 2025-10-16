@@ -9,7 +9,7 @@ export default defineConfig({
         port: 8089,
         proxy: {
             "/api": {
-                target: "http://aus4d.org",
+                target: "http://localhost:8099",
                 changeOrigin: true,
             },
         },
