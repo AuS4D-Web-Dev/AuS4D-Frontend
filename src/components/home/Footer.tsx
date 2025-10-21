@@ -13,7 +13,7 @@ const Footer: FC<FooterProps> = ({ id = "footer" }) => (
             © {new Date().getFullYear()} Australian Students for Development Network
         </p>
         <p className="text-sm mt-2 text-green-200">
-            Building connections for a more just and sustainable world.
+            Contact hello@aus4d.org for more information.
         </p>
     </footer>
 );
