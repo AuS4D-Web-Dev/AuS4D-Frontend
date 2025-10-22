@@ -14,7 +14,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: 🔍 Check prod-test CI
+            - name: 🕒 Wait for prod-test/ci to finish
               uses: actions/github-script@v7
               with:
                   script: |
@@ -22,18 +22,34 @@ jobs:
                       const owner = context.repo.owner;
                       const repo = context.repo.repo;
 
-                      // ✅ 直接从 prod-test 分支查找该 commit 的状态
-                      const { data: statuses } = await github.request(
-                        'GET /repos/{owner}/{repo}/commits/{ref}/statuses',
-                        { owner, repo, ref: sha }
-                      );
+                      const waitSeconds = 600; 
+                      const interval = 15;
+                      const targetContext = "prod-test/ci";
 
-                      const ok = statuses.some(s =>
-                        s.context === "prod-test/ci" && s.state === "success"
-                      );
+                      let result = null;
 
-                      if (!ok) {
-                        core.setFailed(`❌ Commit ${sha.slice(0,7)} has not passed prod-test/ci.`);
+                      for (let elapsed = 0; elapsed < waitSeconds; elapsed += interval) {
+                        const { data: statuses } = await github.request(
+                          'GET /repos/{owner}/{repo}/commits/{ref}/statuses',
+                          { owner, repo, ref: sha }
+                        );
+
+                        const status = statuses.find(s => s.context === targetContext);
+                        if (status) {
+                          core.info(`🔎 Found prod-test/ci status: ${status.state}`);
+                          result = status.state;
+                          if (["success", "failure", "error"].includes(result)) break;
+                        } else {
+                          core.info(`⏳ No prod-test/ci status yet (${elapsed}/${waitSeconds}s)`);
+                        }
+
+                        await new Promise(r => setTimeout(r, interval * 1000));
+                      }
+
+                      if (!result) {
+                        core.setFailed(`❌ No prod-test/ci result found within ${waitSeconds}s.`);
+                      } else if (result === "success") {
+                        core.info("✅ prod-test/ci succeeded — allowing merge.");
                       } else {
-                        core.info(`✅ Commit ${sha.slice(0,7)} passed prod-test/ci.`);
+                        core.setFailed(`❌ prod-test/ci result: ${result.toUpperCase()} — blocking merge.`);
                       }
