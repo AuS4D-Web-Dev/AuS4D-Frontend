@@ -1,0 +1,39 @@
+name: 🔒 Gate to main
+
+on:
+    pull_request:
+        branches: [main]
+
+permissions:
+    contents: read
+    statuses: read
+
+jobs:
+    verify-prod-test-pass:
+        name: 🔍 Verify commit passed on prod-test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: 🔍 Check prod-test CI
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const sha = context.payload.pull_request.head.sha;
+                      const owner = context.repo.owner;
+                      const repo = context.repo.repo;
+
+                      // ✅ 直接从 prod-test 分支查找该 commit 的状态
+                      const { data: statuses } = await github.request(
+                        'GET /repos/{owner}/{repo}/commits/{ref}/statuses',
+                        { owner, repo, ref: sha }
+                      );
+
+                      const ok = statuses.some(s =>
+                        s.context === "prod-test/ci" && s.state === "success"
+                      );
+
+                      if (!ok) {
+                        core.setFailed(`❌ Commit ${sha.slice(0,7)} has not passed prod-test/ci.`);
+                      } else {
+                        core.info(`✅ Commit ${sha.slice(0,7)} passed prod-test/ci.`);
+                      }
