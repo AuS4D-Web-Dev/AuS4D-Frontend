@@ -1,0 +1,55 @@
+name: 🔒 Gate to main
+
+on:
+    pull_request:
+        branches: [main]
+
+permissions:
+    contents: read
+    statuses: read
+
+jobs:
+    verify-prod-test-pass:
+        name: 🔍 Verify commit passed on prod-test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: 🕒 Wait for prod-test/ci to finish
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const sha = context.payload.pull_request.head.sha;
+                      const owner = context.repo.owner;
+                      const repo = context.repo.repo;
+
+                      const waitSeconds = 600; 
+                      const interval = 15;
+                      const targetContext = "prod-test/ci";
+
+                      let result = null;
+
+                      for (let elapsed = 0; elapsed < waitSeconds; elapsed += interval) {
+                        const { data: statuses } = await github.request(
+                          'GET /repos/{owner}/{repo}/commits/{ref}/statuses',
+                          { owner, repo, ref: sha }
+                        );
+
+                        const status = statuses.find(s => s.context === targetContext);
+                        if (status) {
+                          core.info(`🔎 Found prod-test/ci status: ${status.state}`);
+                          result = status.state;
+                          if (["success", "failure", "error"].includes(result)) break;
+                        } else {
+                          core.info(`⏳ No prod-test/ci status yet (${elapsed}/${waitSeconds}s)`);
+                        }
+
+                        await new Promise(r => setTimeout(r, interval * 1000));
+                      }
+
+                      if (!result) {
+                        core.setFailed(`❌ No prod-test/ci result found within ${waitSeconds}s.`);
+                      } else if (result === "success") {
+                        core.info("✅ prod-test/ci succeeded — allowing merge.");
+                      } else {
+                        core.setFailed(`❌ prod-test/ci result: ${result.toUpperCase()} — blocking merge.`);
+                      }
